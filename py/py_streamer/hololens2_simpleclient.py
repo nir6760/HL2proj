@@ -10,12 +10,14 @@ from enum import Enum
 import numpy as np
 import cv2
 import time
+import argparse
 from pathlib import Path
-from StreamRecorderConverter.savePcloud_v2 import save_data_for_registration, save_ply_from_client,\
+from StreamRecorderConverter.savePcloud_v2 import save_data_for_registration, save_ply_from_client, \
     delete_txt_from_dir_content
-from StreamRecorderConverter.fast_registration import do_registeration
+from StreamRecorderConverter.fast_registration import do_registration
+
 np.warnings.filterwarnings('ignore')
-#check commit1
+# check commit1
 # Definitions
 # Protocol Header Format
 # see https://docs.python.org/2/library/struct.html#format-characters
@@ -56,7 +58,7 @@ EXT_LUT_STREAM_HEADER = namedtuple(
 VIDEO_STREAM_PORT = 23940
 AHAT_STREAM_PORT = 23941
 EXT_LUT_STREAM_PORT = 23941
-REGISTRATION_PORT = 8012
+REGISTRATION_PORT = 13000
 # HOST = '192.168.0.80'
 # HOST = '192.168.43.23' #HL 5
 # HOST = '132.69.209.20'
@@ -112,7 +114,7 @@ class FrameReceiverThread(threading.Thread):
 
         # read the image in chunks
         row_stride = header.RowStride
-        #if from_camera == 'ahat': #Long Throw
+        # if from_camera == 'ahat': #Long Throw
         #    row_stride = 2* row_stride
         image_size_bytes = header.ImageHeight * row_stride
 
@@ -124,6 +126,7 @@ class FrameReceiverThread(threading.Thread):
     def recvall(self, size):
         msg = bytes()
         while len(msg) < size:
+
             part = self.socket.recv(size - len(msg))
             if part == '':
                 break  # the connection is closed
@@ -192,7 +195,8 @@ class AhatReceiverThread(FrameReceiverThread):
         while thread_running:
             latest_header_depth, image_data = self.get_data_from_socket('ahat')
             latest_frame_depth = np.frombuffer(image_data, dtype=np.uint16)
-            latest_frame_depth = np.reshape(latest_frame_depth, (latest_header_depth.ImageHeight, latest_header_depth.ImageWidth))
+            latest_frame_depth = np.reshape(latest_frame_depth,
+                                            (latest_header_depth.ImageHeight, latest_header_depth.ImageWidth))
             pass
             # todo: maybe need to be uint8
 
@@ -247,27 +251,34 @@ def start_socket_and_listen(num_round=0):
     t_ahaht = ahat_receiver.start_listen()
     return video_receiver, ahat_receiver, t_video, t_ahaht
 
-# sending file to HL
+
+# sending file (suppose to be txt file) to HL
 def send_file_to_HL(file_paht_to_send):
-    s = socket.socket()
-    s.connect(("localhost", REGISTRATION_PORT))
+    packet_size = 1024
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #s.connect((HOST, REGISTRATION_PORT))
+    s.connect(('127.0.0.1', REGISTRATION_PORT))
     filetosend = open(file_paht_to_send, "rb")
-    data = filetosend.read(1024)
+    data = filetosend.read(packet_size)
     while data:
-        print("Sending...")
+        print("Sending after reg stream...")
         s.send(data)
-        data = filetosend.read(1024)
+        data = filetosend.read(packet_size)
     filetosend.close()
-    s.send(b"DONE")
-    print("Done Sending.")
-    print(s.recv(1024))
+    print("Done Sending after reg stream.")
+
     s.shutdown(2)
     s.close()
+    print("close connection")
     # Done :)
 
 
 if __name__ == '__main__':
-    only_smaple = True
+    parser = argparse.ArgumentParser(description='Process recorded data.')
+    parser.add_argument("--only_smaple", required=False, default=False,
+                        help="sample once pcd")
+    args = parser.parse_args()
+    only_smaple = args.only_smaple
     print('script start:')
     # print('getting extrincs and lut:')
     #
@@ -286,16 +297,15 @@ if __name__ == '__main__':
     file_path = Path(__file__)
     converter_folder = file_path.parent.parent
     reg_folder = Path(os.path.join(converter_folder, 'register_folder'))
-    objects_folder_path = Path(os.path.join(converter_folder, 'ply_files'))
+    outputs_folder = Path(os.path.join(converter_folder, 'outputs'))
+    ply_folder = Path(os.path.join(outputs_folder, 'ply_files'))
+    obj_folder = Path(os.path.join(outputs_folder, 'obj_files'))
+    txt_folder = Path(os.path.join(outputs_folder, 'txt_files'))
 
     is_dir = converter_folder.is_dir()
 
-
     rounds = 1
     video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)
-
-
-
 
     while True:
         time.sleep(1)
@@ -347,13 +357,10 @@ if __name__ == '__main__':
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
 
-
                 # saving all data in the correct format
                 save_data_for_registration(video_reciver_header, ahat_receiver_header,
                                            video_reciver_frame, ahat_receiver_frame,
                                            reg_folder)
-
-
 
                 video_receiver.end_socket('video_' + str(rounds))
                 ahat_receiver.end_socket('ahat_' + str(rounds))
@@ -361,39 +368,38 @@ if __name__ == '__main__':
                 # rgb + depth to ply
                 # save ply
 
-                ply_was_saved = save_ply_from_client(reg_folder, objects_folder=objects_folder_path)
+                ply_was_saved = save_ply_from_client(reg_folder, objects_folder=ply_folder)
 
                 if only_smaple:
                     print('lets stop here for now, only sample, round num is ', rounds)
                     exit(0)
-                    #push 1
+                    # push 1
                 if ply_was_saved:
                     # get ply from ct scan
-                    ct_scan_path = os.path.join(objects_folder_path, 'only_face_doll1.ply')
-                    ct_scan_mesh_path = os.path.join(objects_folder_path, 'only_face_doll1_mesh.obj')
+                    ct_scan_path = os.path.join(ply_folder, 'only_face_doll1.ply')
+                    ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll1_mesh.obj')
 
                     # get ply from streaming
-                    streaming_face_path = os.path.join(objects_folder_path, 'only_face.ply')
-                    #streaming_face_path = os.path.join(objects_folder_path, '132716853518615948_only_face_oren1.ply')
+                    streaming_face_path = os.path.join(ply_folder, 'only_face.ply')
 
-                    #delete all txt files
-                    delete_txt_from_dir_content(objects_folder_path)
+                    # delete all txt files
+                    delete_txt_from_dir_content(txt_folder)
                     # get saving transformed obj as txt
                     # do registration and save results
                     print('start registration:')
-                    transformed_obj_mesh_path = do_registeration(source_path=ct_scan_path, target_path=streaming_face_path,
-                                     source_mesh_path=ct_scan_mesh_path)
+                    transformed_obj_mesh_path = do_registration(source_path=ct_scan_path,
+                                                                target_path=streaming_face_path,
+                                                                source_mesh_path=ct_scan_mesh_path)
                     print('end registration:')
                     time.sleep(3)
                 else:
                     print('There wasnt saving at the last round')
                 # send registration back
 
-                #send_file_to_HL(transformed_obj_mesh_path)
-                #registration_was_pressed = False
+                # send_file_to_HL(transformed_obj_mesh_path)
+                # registration_was_pressed = False
 
                 # start again
                 rounds = rounds + 1
 
         video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)
-
