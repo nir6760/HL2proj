@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='fast registration')
     parser.add_argument("--save_transformed_mesh", required=False, default=False,
                         help="save transformed mesh?")
-    parser.add_argument("--voxel_size", required=False, default=0.01,type=float,
+    parser.add_argument("--voxel_size", required=False, default=0.01, type=float,
                         help="voxel_size")
 
     args = parser.parse_args()

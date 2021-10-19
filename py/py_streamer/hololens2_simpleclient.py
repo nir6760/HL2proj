@@ -15,6 +15,7 @@ from pathlib import Path
 from StreamRecorderConverter.savePcloud_v2 import save_data_for_registration, save_ply_from_client, \
     delete_txt_from_dir_content
 from StreamRecorderConverter.fast_registration import do_registration
+from py_streamer.test_tcp_client import send_file_to_HL
 
 np.warnings.filterwarnings('ignore')
 # check commit1
@@ -58,11 +59,10 @@ EXT_LUT_STREAM_HEADER = namedtuple(
 VIDEO_STREAM_PORT = 23940
 AHAT_STREAM_PORT = 23941
 EXT_LUT_STREAM_PORT = 23941
-REGISTRATION_PORT = 13000
+LOADING_PORT = 13000
 # HOST = '192.168.0.80'
-# HOST = '192.168.43.23' #HL 5
-# HOST = '132.69.209.20'
-HOST = '10.0.0.1'
+HOST = '10.0.0.4'
+LOCAL_HOST = '127.0.0.1'
 
 HundredsOfNsToMilliseconds = 1e-4
 MillisecondsToSeconds = 1e-3
@@ -252,25 +252,6 @@ def start_socket_and_listen(num_round=0):
     return video_receiver, ahat_receiver, t_video, t_ahaht
 
 
-# sending file (suppose to be txt file) to HL
-def send_file_to_HL(file_paht_to_send):
-    packet_size = 1024
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #s.connect((HOST, REGISTRATION_PORT))
-    s.connect(('127.0.0.1', REGISTRATION_PORT))
-    filetosend = open(file_paht_to_send, "rb")
-    data = filetosend.read(packet_size)
-    while data:
-        print("Sending after reg stream...")
-        s.send(data)
-        data = filetosend.read(packet_size)
-    filetosend.close()
-    print("Done Sending after reg stream.")
-
-    s.shutdown(2)
-    s.close()
-    print("close connection")
-    # Done :)
 
 
 if __name__ == '__main__':
@@ -374,6 +355,7 @@ if __name__ == '__main__':
                     print('lets stop here for now, only sample, round num is ', rounds)
                     exit(0)
                     # push 1
+                transformed_obj_mesh_path = None
                 if ply_was_saved:
                     # get ply from ct scan
                     ct_scan_path = os.path.join(ply_folder, 'only_face_doll1.ply')
@@ -395,8 +377,7 @@ if __name__ == '__main__':
                 else:
                     print('There wasnt saving at the last round')
                 # send registration back
-
-                # send_file_to_HL(transformed_obj_mesh_path)
+                #send_file_to_HL(transformed_obj_mesh_path, HOST, LOADING_PORT)
                 # registration_was_pressed = False
 
                 # start again
