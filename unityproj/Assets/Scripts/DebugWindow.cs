@@ -7,7 +7,7 @@ public class DebugWindow : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        textMesh = gameObject.GetComponentInChildren<TextMesh>();
+        //textMesh = gameObject.GetComponentInChildren<TextMesh>();
     }
 
     void OnEnable()
@@ -22,13 +22,13 @@ public class DebugWindow : MonoBehaviour
 
     public void LogMessage(string message, string stackTrace, LogType type)
     {
-        if (textMesh.text.Length > 200)
+        if (gameObject.GetComponentInChildren<TextMesh>().text.Length > 200)
         {
-            textMesh.text = message + "\n";
+            gameObject.GetComponentInChildren<TextMesh>().text = message + "\n";
         }
         else
         {
-            textMesh.text += message + "\n";
+            gameObject.GetComponentInChildren<TextMesh>().text += message + "\n";
         }
     }
 }

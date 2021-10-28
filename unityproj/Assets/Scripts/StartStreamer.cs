@@ -18,11 +18,22 @@ public class StartStreamer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
- 
-        Debug.Log("Windows Runtime Support enabled 0 ");
+#if !UNITY_EDITOR
+        Debug.Log("Not unity editor");
+#else
+    Debug.Log("Windows Runtime Support enabled 0 ");
+#endif
+#if WINDOWS_UWP
+        Debug.Log("UWP app");
+
+#else
+    Debug.Log("Not UWP app ");
+#endif
 #if ENABLE_WINMD_SUPPORT
-    Debug.Log("Windows Runtime Support enabled 3");
-                    StartDll();
+        Debug.Log("Again not unity editor");
+        StartDll();
+#else
+    Debug.Log("Windows Runtime Support enabled 0 ");
 #endif
     }
 

@@ -24,8 +24,9 @@ using Windows.Storage.Streams;
 public static class Globals
 {
     public const Int32 BUFFER_SIZE = 512; // Unmodifiable
-    public static String obj_string;
+    public static String obj_string="#empty";
     public static bool new_sent = false;
+    public static uint g_msg0;
 }
 
 public class on_click_registration : MonoBehaviour
@@ -112,10 +113,10 @@ public class on_click_registration : MonoBehaviour
     private async void Listener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
     {
         Debug.Log("Connection received");
-        uint max_size_string_for_file_size = 1000;
+        uint max_buffer_size_for_file = 15; //1092323 file size,  1092323# Create
         try
         {
-          
+
             while (true)
             {
 
@@ -125,7 +126,6 @@ public class on_click_registration : MonoBehaviour
                     await dw.StoreAsync();
                     dw.DetachStream();
                 }*/
-                MemoryStream memory_stream = new MemoryStream();
                 using (var dr = new DataReader(args.Socket.InputStream))
                 {
                     //// The encoding and byte order need to match the settings of the writer 
@@ -134,37 +134,33 @@ public class on_click_registration : MonoBehaviour
                     //dr.ByteOrder = Windows.Storage.Streams.ByteOrder.LittleEndian;
 
                     dr.InputStreamOptions = InputStreamOptions.Partial;
-                    await dr.LoadAsync(max_size_string_for_file_size);
-                    string msg0 = dr.ReadString(max_size_string_for_file_size);
-                    uint file_size = Convert.ToUInt32(msg0);
+                    await dr.LoadAsync(max_buffer_size_for_file);
+                    string msg0 = dr.ReadString(max_buffer_size_for_file);
+                    string file_size_str = msg0.Split('#')[0];
+                    
+                    uint file_size = Convert.ToUInt32(file_size_str);
                     Debug.Log(file_size);
-                    while (dr.UnconsumedBufferLength > 0)
-                    {
-                        await dr.LoadAsync(file_size);
-                        var input = dr.ReadString(file_size);
-                        //Debug.Log("received: " + input);
-                        byte[] data = System.Text.Encoding.UTF8.GetBytes(input);
-                        //Debug.Log("recived " + i);
-                        memory_stream.Write(data, 0, Convert.ToInt32(file_size));
-                    }
+                    Globals.g_msg0 = file_size;
+
+                    await dr.LoadAsync(file_size);
+                    Globals.obj_string ="# " + dr.ReadString(file_size -(max_buffer_size_for_file - Convert.ToUInt32(file_size_str.Length)));
+                    Globals.new_sent = true;
+                    //Debug.Log("received: " + input);
+                    //Debug.Log("recived " + i);
                 }
-                Debug.Log("all recived, close connection");
-                Globals.obj_string = System.Text.Encoding.UTF8.GetString(memory_stream.ToArray());
-                Globals.new_sent = true;
-                //System.Threading.Thread.Sleep(1000);
             }
         }
         catch (Exception e)
         {
             Debug.Log("disconnected!!!!!!!! " + e);
         }
-
+        Debug.Log("all recived, close connection");
+        //System.Threading.Thread.Sleep(1000);
     }
 #else
     void TcpListener()
     {
         TcpListener server = null;
-        int uint32_size = 4;
         try
         {
             // Set the TcpListener on port 13000.
@@ -184,7 +180,6 @@ public class on_click_registration : MonoBehaviour
                 TcpClient client = server.AcceptTcpClient();
                 int buffer_size = client.ReceiveBufferSize;
                 Byte[] bytes_curr = new Byte[buffer_size];
-                Byte[] uint32_size_bytes = new Byte[uint32_size];
                 Debug.Log("Connected!");
                 // Get a stream object for reading and writing
                 NetworkStream stream = client.GetStream();
@@ -193,6 +188,7 @@ public class on_click_registration : MonoBehaviour
                 // Loop to receive all the data sent by the client.
                 s = stream.Read(bytes_curr, 0, buffer_size);
                 string msg0 = Encoding.UTF8.GetString(bytes_curr);
+                Debug.Log(msg0);
                 uint file_size = Convert.ToUInt32(msg0);
                 Debug.Log(file_size);
                 while ((i = stream.Read(bytes_curr, 0, buffer_size)) != 0)
@@ -228,6 +224,9 @@ public class on_click_registration : MonoBehaviour
     {
         if (Globals.new_sent == true)
         {
+            Debug.Log("new sent is true");
+            Debug.Log("msg size is " + (Globals.g_msg0).ToString());
+            
             if (buttomn.transform.hasChanged == true)
             {
                 buttomn.transform.hasChanged = false;
@@ -251,7 +250,8 @@ public class on_click_registration : MonoBehaviour
                         loadedObj.transform.parent = ct_parent_obj.transform;
                         Globals.new_sent = false;
                     }
-                    catch{
+                    catch
+                    {
                         Debug.Log("ms is fucked up");
                     }
                     Debug.Log("obj was loaded " + cnt_pressed);

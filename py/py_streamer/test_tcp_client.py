@@ -45,8 +45,9 @@ async def tcp_echo_client(file_path_to_send, loop, host, loading_port):
     filetosend = open(file_path_to_send, "r", encoding="utf-8")
     # get the size of file
     size_bytes_of_txt_file = os.path.getsize(file_path_to_send)
-    print('Size of file is', size_bytes_of_txt_file, 'bytes')
+
     content = filetosend.read()
+    print('Size of file is', size_bytes_of_txt_file, 'bytes')
     # d = '\n'
     # lines = [e + d for e in content.split(d) if e]
     # for line in lines:
@@ -55,6 +56,8 @@ async def tcp_echo_client(file_path_to_send, loop, host, loading_port):
     #     writer.write(line.encode())
     print("Sending after reg stream...")
     writer.write(str(size_bytes_of_txt_file).encode())
+    await writer.drain()
+
     writer.write(content.encode())
     # data = filetosend.read(packet_size) #sending in packet size
     # while data:
@@ -78,10 +81,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     file_path = args.file_path
     LOADING_PORT = 13000
-    HOST = '10.0.0.4'
+    HOST = '10.0.0.2'
     LOCAL_HOST = '127.0.0.1'
-    #send_file_to_HL_0(file_path, HOST, LOADING_PORT) # old try
-
-    # THIS CODE WORKS SENDING STRING MESSAGE TO HOLOLENS
-
-    send_file_to_HL(file_path, LOCAL_HOST, LOADING_PORT)
+    send_file_to_HL(file_path, HOST, LOADING_PORT) # old try
+    #send_file_to_HL(file_path, LOCAL_HOST, LOADING_PORT)
