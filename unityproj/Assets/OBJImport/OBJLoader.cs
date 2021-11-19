@@ -100,6 +100,7 @@ namespace Dummiesman
         public GameObject Load(Stream input)
         {
             var reader = new StreamReader(input);
+            Debug.Log("after stream reader");
             //var reader = new StringReader(inputReader.ReadToEnd());
 
             Dictionary<string, OBJObjectBuilder> builderDict = new Dictionary<string, OBJObjectBuilder>();

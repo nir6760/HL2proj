@@ -24,7 +24,9 @@ using Windows.Storage.Streams;
 public static class Globals
 {
     public const Int32 BUFFER_SIZE = 512; // Unmodifiable
-    public static String obj_string="#empty";
+    public static String obj_string= "#";
+    public static String try_string = "try_msg";
+    public static String all_recived = "try_msg";
     public static bool new_sent = false;
     public static uint g_msg0;
 }
@@ -46,6 +48,7 @@ public class on_click_registration : MonoBehaviour
     Matrix4x4 transform1_matrix;
     
     MemoryStream ms;
+    bool first_time = true;
 
 
     // Start is called before the first frame update
@@ -67,6 +70,7 @@ public class on_click_registration : MonoBehaviour
         transform1_matrix.m22 =  0.93859195f;
         transform1_matrix.m23 =  0.13752421f;
 
+
         transform1_matrix.m30 = 0;
         transform1_matrix.m31 = 0;
         transform1_matrix.m32 = 0;
@@ -75,7 +79,7 @@ public class on_click_registration : MonoBehaviour
 #if !UNITY_EDITOR
         Debug.Log("Not Unity Editor, UWP");
         listener = new StreamSocketListener();
-        port = "13000";
+        port = "13002";
         listener.ConnectionReceived += Listener_ConnectionReceived;
         listener.Control.KeepAlive = false;
 
@@ -116,11 +120,11 @@ public class on_click_registration : MonoBehaviour
         uint max_buffer_size_for_file = 15; //1092323 file size,  1092323# Create
         try
         {
-
+            Globals.new_sent = true;
             while (true)
             {
 
-                /*using (var dw = new DataWriter(args.Socket.OutputStream))
+               /* using (var dw = new DataWriter(args.Socket.OutputStream))
                 {
                     dw.WriteString("Hello There");
                     await dw.StoreAsync();
@@ -130,21 +134,35 @@ public class on_click_registration : MonoBehaviour
                 {
                     //// The encoding and byte order need to match the settings of the writer 
                     //// we previously used.
-                    //dr.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
-                    //dr.ByteOrder = Windows.Storage.Streams.ByteOrder.LittleEndian;
+                    dr.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
+                    dr.ByteOrder = Windows.Storage.Streams.ByteOrder.LittleEndian;
 
                     dr.InputStreamOptions = InputStreamOptions.Partial;
                     await dr.LoadAsync(max_buffer_size_for_file);
                     string msg0 = dr.ReadString(max_buffer_size_for_file);
+                    Globals.try_string = String.Copy(msg0);
                     string file_size_str = msg0.Split('#')[0];
+
                     
+
                     uint file_size = Convert.ToUInt32(file_size_str);
+                    //uint file_size = 15;
                     Debug.Log(file_size);
                     Globals.g_msg0 = file_size;
 
-                    await dr.LoadAsync(file_size);
-                    Globals.obj_string ="# " + dr.ReadString(file_size -(max_buffer_size_for_file - Convert.ToUInt32(file_size_str.Length)));
-                    Globals.new_sent = true;
+                    uint updated_file_size = file_size - (max_buffer_size_for_file - Convert.ToUInt32(file_size_str.Length));
+                    await dr.LoadAsync(30);
+                    string input_string = dr.ReadString(30);
+                    Globals.obj_string = "#" + String.Copy(input_string);
+
+                    await dr.LoadAsync(30);
+                    input_string = dr.ReadString(30);
+                    Globals.obj_string += String.Copy(input_string);
+
+                    await dr.LoadAsync(30);
+                    input_string = dr.ReadString(30);
+                    Globals.obj_string += String.Copy(input_string);
+
                     //Debug.Log("received: " + input);
                     //Debug.Log("recived " + i);
                 }
@@ -164,7 +182,7 @@ public class on_click_registration : MonoBehaviour
         try
         {
             // Set the TcpListener on port 13000.
-            Int32 port = 13000;
+            Int32 port = 13001;
             IPAddress localAddr = IPAddress.Parse("127.0.0.1");
             server = new TcpListener(localAddr, port);
             // Start listening for client requests.
@@ -186,11 +204,11 @@ public class on_click_registration : MonoBehaviour
                 int i,s;
                 MemoryStream memory_stream = new MemoryStream();
                 // Loop to receive all the data sent by the client.
-                s = stream.Read(bytes_curr, 0, buffer_size);
-                string msg0 = Encoding.UTF8.GetString(bytes_curr);
-                Debug.Log(msg0);
-                uint file_size = Convert.ToUInt32(msg0);
-                Debug.Log(file_size);
+                //s = stream.Read(bytes_curr, 0, buffer_size);
+                //string msg0 = Encoding.UTF8.GetString(bytes_curr);
+                //Debug.Log(msg0);
+                //uint file_size = Convert.ToUInt32(msg0);
+                //Debug.Log(file_size);
                 while ((i = stream.Read(bytes_curr, 0, buffer_size)) != 0)
                 {
                     string msg = Encoding.UTF8.GetString(bytes_curr);
@@ -222,9 +240,13 @@ public class on_click_registration : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //if (Globals.new_sent == true)
         if (Globals.new_sent == true)
         {
-            Debug.Log("new sent is true");
+            Debug.Log("try string is is true");
+            Debug.Log(Globals.try_string);
+            Debug.Log("obj string is is true");
+            Debug.Log(Globals.obj_string);
             Debug.Log("msg size is " + (Globals.g_msg0).ToString());
             
             if (buttomn.transform.hasChanged == true)
@@ -235,25 +257,31 @@ public class on_click_registration : MonoBehaviour
                 {
                     Destroy(child.gameObject);
                 }
+                /*ms = new MemoryStream(Encoding.UTF8.GetBytes("# Created by Open3D\nv 0 0 0\nv 0 1 0\nv 1 1 0\nv 1 0 0\nv 1 1 1\nv 0 1 1\nv 0 0 1\nf 1 2 3 4\nf 1 2 5 6\n"));*/
                 ms = new MemoryStream(Encoding.UTF8.GetBytes(Globals.obj_string));
-                Debug.Log("sent is true and bottoumn was pressed");
+                Debug.Log("sent is true and button was pressed");
+                
                 cnt_pressed++;
                 try
                 {
                     GameObject loadedObj;
+                    
                     try
                     {
                         //loading new one
                         loadedObj = new OBJLoader().Load(ms);
+                        Debug.Log("after load");
                         //rename new
                         loadedObj.name = "after_reg_mesh";
                         loadedObj.transform.parent = ct_parent_obj.transform;
                         Globals.new_sent = false;
+                        
                     }
                     catch
                     {
                         Debug.Log("ms is fucked up");
                     }
+                    
                     Debug.Log("obj was loaded " + cnt_pressed);
                 }
                 catch
@@ -267,6 +295,7 @@ public class on_click_registration : MonoBehaviour
                 }
                 //var try_to_move_obj = GameObject.Find("try");
                 //try_to_move_obj.transform.position = transform1_matrix.MultiplyPoint(try_to_move_obj.transform.position);
+                first_time = false;
             }
         }
 

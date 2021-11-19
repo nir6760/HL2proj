@@ -22,7 +22,7 @@ public class DebugWindow : MonoBehaviour
 
     public void LogMessage(string message, string stackTrace, LogType type)
     {
-        if (gameObject.GetComponentInChildren<TextMesh>().text.Length > 200)
+        if (gameObject.GetComponentInChildren<TextMesh>().text.Length > 2000)
         {
             gameObject.GetComponentInChildren<TextMesh>().text = message + "\n";
         }
