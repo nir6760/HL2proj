@@ -2,7 +2,7 @@ import os
 import socket
 import struct
 import abc
-import sys
+import zmq
 import threading
 from datetime import datetime, timedelta
 from collections import namedtuple, deque
@@ -16,6 +16,7 @@ from StreamRecorderConverter.savePcloud_v2 import save_data_for_registration, sa
     delete_txt_from_dir_content
 from StreamRecorderConverter.fast_registration import do_registration
 from py_streamer.test_tcp_client import send_file_to_HL
+from py_streamer.zmq_server import ServerZMQ
 
 np.warnings.filterwarnings('ignore')
 # check commit1
@@ -64,6 +65,7 @@ LOADING_PORT = 13000
 HOST = '10.0.0.2'
 LOCAL_HOST = '127.0.0.1'
 
+
 HundredsOfNsToMilliseconds = 1e-4
 MillisecondsToSeconds = 1e-3
 
@@ -77,7 +79,6 @@ registration_was_pressed = True
 
 ext_mat_glob = None
 lut_arr_glob = None
-
 
 class SensorType(Enum):
     VIDEO = 1
@@ -285,6 +286,12 @@ if __name__ == '__main__':
 
     is_dir = converter_folder.is_dir()
 
+    # ZMQ server
+    zmq_server = ServerZMQ()
+    zmq_server.init_server()
+    zmq_server.listen()
+
+
     rounds = 1
     video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)
 
@@ -376,6 +383,7 @@ if __name__ == '__main__':
                     time.sleep(3)
                 else:
                     print('There wasnt saving at the last round')
+
                 # send registration back
                 #send_file_to_HL(transformed_obj_mesh_path, HOST, LOADING_PORT)
                 # registration_was_pressed = False

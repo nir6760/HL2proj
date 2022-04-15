@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import socket
 import os
+
 # sending file (suppose to be txt file) to HL, old
 def send_file_to_HL_0(file_path_to_send, host, loading_port):
     if file_path_to_send is None:
@@ -47,18 +48,19 @@ async def tcp_echo_client(file_path_to_send, loop, host, loading_port):
     size_bytes_of_txt_file = os.path.getsize(file_path_to_send)
 
     content = filetosend.read()
+    #content ="# Created by Open3D\nv 0 0 0\nv 0 1 0\nv 1 1 0\nv 1 0 0\nv 1 1 1\nv 0 1 1\nv 0 0 1\nf 1 2 3 4\nf 1 2 5 6\n"
     print('Size of file is', size_bytes_of_txt_file, 'bytes')
-    # d = '\n'
-    # lines = [e + d for e in content.split(d) if e]
-    # for line in lines:
-    #     print("Sending after reg stream...")
-    #     writer.write( str(len(line)).encode() )
-    #     writer.write(line.encode())
+    #print(content)
+
     print("Sending after reg stream...")
+
     writer.write(str(size_bytes_of_txt_file).encode())
-    await writer.drain()
+    #await writer.drain()
 
     writer.write(content.encode())
+    #await writer.drain()
+    writer.write_eof()
+    await writer.drain()
     # data = filetosend.read(packet_size) #sending in packet size
     # while data:
     #     print("Sending after reg stream...")
@@ -80,8 +82,8 @@ if __name__ == '__main__':
                         help="file path to send (txt file) ")
     args = parser.parse_args()
     file_path = args.file_path
-    LOADING_PORT = 13000
-    HOST = '10.0.0.2'
+    LOADING_PORT = 13002
+    HOST = '10.0.0.1'
     LOCAL_HOST = '127.0.0.1'
-    send_file_to_HL(file_path, HOST, LOADING_PORT) # old try
-    #send_file_to_HL(file_path, LOCAL_HOST, LOADING_PORT)
+    #send_file_to_HL(file_path, HOST, LOADING_PORT) # old try
+    send_file_to_HL(file_path, HOST, LOADING_PORT)
