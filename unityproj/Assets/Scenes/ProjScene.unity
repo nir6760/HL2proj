@@ -654,6 +654,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d8a5d91cfb99e41abc51526145c7e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  host: 127.0.0.1
+  port: 12345
   buttomn: {fileID: 548926697}
   ct_parent_obj: {fileID: 1275915246}
 --- !u!4 &949716638

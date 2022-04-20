@@ -385,7 +385,7 @@ if __name__ == '__main__':
                     print('There wasnt saving at the last round')
 
                 # send registration back
-                #send_file_to_HL(transformed_obj_mesh_path, HOST, LOADING_PORT)
+                send_file_to_HL(transformed_obj_mesh_path, HOST, LOADING_PORT)
                 # registration_was_pressed = False
 
                 # start again
