@@ -153,8 +153,8 @@ if __name__ == "__main__":
 
     #voxel_size = 0.05  # means 5cm for the dataset
     source, target, source_down, target_down, source_fpfh, target_fpfh = \
-        prepare_dataset(voxel_size, source_name='only_face_doll5.ply',
-                        target_name='only_face_doll8.ply')
+        prepare_dataset(voxel_size, source_name='only_face_doll8.ply',
+                        target_name='only_face_doll1.ply')
     draw_registration_result(source, target, np.identity(4),
                              title='Input')
     result_ransac = execute_global_registration(source_down, target_down,
@@ -244,4 +244,5 @@ def do_registration(source_path, target_path, source_mesh_path):
     print(o3d.io.write_triangle_mesh(source_path_mesh_after_reg, source_temp_mesh))
     p = Path(source_path_mesh_after_reg)
     p.rename(p.with_suffix('.txt'))
-    return source_path_mesh_after_reg
+    source_path_mesh_after_reg_to_send = os.path.join(txt_folder, 'after_reg_mesh.txt')
+    return source_path_mesh_after_reg_to_send

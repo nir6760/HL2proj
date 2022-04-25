@@ -53,47 +53,25 @@ public static class Globals
 
         public GameObject buttomn;
         public GameObject ct_parent_obj;
-        Matrix4x4 transform1_matrix;
+        private string input_host;
+        private string input_port;
 
-        MemoryStream ms;
-        bool first_time = true;
+    MemoryStream ms;
 
 
-        // Start is called before the first frame update
-        void Start()
+
+    // Start is called before the first frame update
+    void Start()
         {
 
-            transform1_matrix.m00 = 0.98898529f;
-            transform1_matrix.m01 = -0.11914511f;
-            transform1_matrix.m02 = 0.08782101f;
-            transform1_matrix.m03 = -0.15361886f;
-
-            transform1_matrix.m10 = 0.08349251f;
-            transform1_matrix.m11 = 0.93898689f;
-            transform1_matrix.m12 = 0.33366544f;
-            transform1_matrix.m13 = -0.40734829f;
-
-            transform1_matrix.m20 = -0.12221738f;
-            transform1_matrix.m21 = -0.32265782f;
-            transform1_matrix.m22 = 0.93859195f;
-            transform1_matrix.m23 = 0.13752421f;
-
-
-            transform1_matrix.m30 = 0;
-            transform1_matrix.m31 = 0;
-            transform1_matrix.m32 = 0;
-            transform1_matrix.m33 = 1;
-
+        
 #if !UNITY_EDITOR
         Debug.Log("Not Unity Editor, UWP");
-        ZMQClient();
 #else
-            Debug.Log("Unity Editor");
+        Debug.Log("Unity Editor");
             /*thread_1 = new Thread(ZMQClient);
             thread_1.IsBackground = true;
             thread_1.Start();*/
-            ZMQClient();
-
 #endif
 
 
@@ -128,7 +106,7 @@ public static class Globals
                     Debug.Log("Connected!");
                     // Get a stream object for reading and writing
                     NetworkStream stream = client.GetStream();
-                    int i, s;
+                    int i;
                     MemoryStream memory_stream = new MemoryStream();
                     // Loop to receive all the data sent by the client.
                     //s = stream.Read(bytes_curr, 0, buffer_size);
@@ -172,6 +150,8 @@ public static class Globals
 
     private void HandleMessage(string message)
     {
+
+        
         Debug.Log("At Handle message! ");
         Globals.obj_string = message;
         Globals.new_sent = true;
@@ -190,16 +170,12 @@ public static class Globals
         // Update is called once per frame
         void Update()
         {
+        
         if (_clientStatus == ClientStatus.Active)
             _listener.DigestMessage();
 
         if (Globals.new_sent == true)
             {
-                Debug.Log("all recived string is");
-                Debug.Log(Globals.all_recived);
-                Debug.Log("i string is");
-                Debug.Log(Globals.try_string);
-                Debug.Log("obj string size is " + (Globals.obj_string.Length).ToString());
 
                 if (buttomn.transform.hasChanged == true)
                 {
@@ -238,11 +214,25 @@ public static class Globals
                     {
                         Debug.Log("exception on OBJLoader");
                     }
-                    //var try_to_move_obj = GameObject.Find("try");
-                    //try_to_move_obj.transform.position = transform1_matrix.MultiplyPoint(try_to_move_obj.transform.position);
-                    first_time = false;
+
                 }
             }
 
         }
-    }
+        public void ReadStringInputUI(string s)
+        {
+            input_host = s;
+            host = input_host;
+            Debug.Log(input_host);
+            ZMQClient();
+            
+
+        }
+        public void ReadStringInputTMP(string s)
+        {
+            input_port = s;
+            Debug.Log(s);
+            Debug.Log(input_port);
+
+        }
+}

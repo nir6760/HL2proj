@@ -55,15 +55,13 @@ async def tcp_echo_client(file_path_to_send, loop, host, loading_port):
 
 
 # sending file (suppose to be txt file) to HL
-def send_file_to_HL(file_path_to_send, host, loading_port):
+def send_file_to_HL(file_path_to_send, zmq_server):
     if file_path_to_send is None:
         print('There is no file path for sending back to HL!!')
         return
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path_to_send, "r", encoding="utf-8") as f:
         content = f.read()
-    zmq_server = ServerZMQ(port=loading_port)
-    zmq_server.init_server()
-    zmq_server.test_send_PUBSUB(content)
+    zmq_server.send_PUBSUB(str_message=content)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='test tcp')

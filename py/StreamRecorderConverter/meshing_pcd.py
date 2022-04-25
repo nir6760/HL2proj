@@ -38,7 +38,7 @@ def meshing_pcd(source_ply):
     mesh.remove_vertices_by_mask(vertices_to_remove)
     print(mesh)
     mesh.transform(np.identity(4))
-    o3d.visualization.draw_geometries([mesh], window_name='meshing result')
+    #o3d.visualization.draw_geometries([mesh], window_name='meshing result')
     return mesh
 
 

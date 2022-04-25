@@ -60,7 +60,7 @@ EXT_LUT_STREAM_HEADER = namedtuple(
 VIDEO_STREAM_PORT = 23940
 AHAT_STREAM_PORT = 23941
 EXT_LUT_STREAM_PORT = 23941
-LOADING_PORT = 13000
+LOADING_PORT = 12345
 # HOST = '192.168.0.80'
 HOST = '10.0.0.2'
 LOCAL_HOST = '127.0.0.1'
@@ -287,11 +287,8 @@ if __name__ == '__main__':
     is_dir = converter_folder.is_dir()
 
     # ZMQ server
-    zmq_server = ServerZMQ()
+    zmq_server = ServerZMQ(port=LOADING_PORT)
     zmq_server.init_server()
-    zmq_server.listen()
-
-
     rounds = 1
     video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)
 
@@ -365,7 +362,7 @@ if __name__ == '__main__':
                 transformed_obj_mesh_path = None
                 if ply_was_saved:
                     # get ply from ct scan
-                    ct_scan_path = os.path.join(ply_folder, 'only_face_doll1.ply')
+                    ct_scan_path = os.path.join(ply_folder, 'only_face_doll8.ply')
                     ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll1_mesh.obj')
 
                     # get ply from streaming
@@ -385,7 +382,8 @@ if __name__ == '__main__':
                     print('There wasnt saving at the last round')
 
                 # send registration back
-                send_file_to_HL(transformed_obj_mesh_path, HOST, LOADING_PORT)
+                print(f"transformed mesh path {transformed_obj_mesh_path}")
+                send_file_to_HL(transformed_obj_mesh_path, zmq_server)
                 # registration_was_pressed = False
 
                 # start again

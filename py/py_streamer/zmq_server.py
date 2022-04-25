@@ -20,6 +20,10 @@ class ServerZMQ():
         message_rx = self.socket.recv()
         print(f"Received request: {message_rx}")
 
+    def send_PUBSUB(self, str_message="default message"):
+        print(f'Sending file')
+        self.socket.send_string(str_message)
+
     def test_send_PUBSUB(self, str_message="default message"):
         i = 0
         while True:
