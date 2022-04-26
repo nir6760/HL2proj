@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     #voxel_size = 0.05  # means 5cm for the dataset
     source, target, source_down, target_down, source_fpfh, target_fpfh = \
-        prepare_dataset(voxel_size, source_name='only_face_doll8.ply',
+        prepare_dataset(voxel_size, source_name='after_reg_face_oren1.ply',
                         target_name='only_face_doll1.ply')
     draw_registration_result(source, target, np.identity(4),
                              title='Input')

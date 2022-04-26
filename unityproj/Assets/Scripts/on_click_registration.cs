@@ -15,6 +15,9 @@ using System.Security.Cryptography;
 using System.Net.Configuration;
 using System.Threading.Tasks;
 using PubSub;
+using TMPro;
+using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.Toolkit.UI;
 
 
 
@@ -66,9 +69,9 @@ public static class Globals
 
         
 #if !UNITY_EDITOR
-        Debug.Log("Not Unity Editor, UWP");
+        //Debug.Log("Not Unity Editor, UWP");
 #else
-        Debug.Log("Unity Editor");
+        //Debug.Log("Unity Editor");
             /*thread_1 = new Thread(ZMQClient);
             thread_1.IsBackground = true;
             thread_1.Start();*/
@@ -142,7 +145,6 @@ public static class Globals
 #endif
     void ZMQClient()
     {
-        Debug.Log("zmq server!");
         _listener = new Listener(host, port, HandleMessage);
         OnStartClient();
         _clientStatus = ClientStatus.Active;
@@ -160,7 +162,7 @@ public static class Globals
 
     private void OnStartClient()
     {
-        Debug.Log("Starting client...");
+        //Debug.Log("Starting client...");
         _clientStatus = ClientStatus.Activating;
         _listener.Start();
         Debug.Log("Client started!");
@@ -174,57 +176,78 @@ public static class Globals
         if (_clientStatus == ClientStatus.Active)
             _listener.DigestMessage();
 
-        if (Globals.new_sent == true)
-            {
-
-                if (buttomn.transform.hasChanged == true)
-                {
-                    buttomn.transform.hasChanged = false;
-
-                    //destroy old one
-                    foreach (Transform child in ct_parent_obj.transform)
-                    {
-                        Destroy(child.gameObject);
-                    }
-                    ms = new MemoryStream(Encoding.UTF8.GetBytes(Globals.obj_string));
-
-                    cnt_pressed++;
-                    try
-                    {
-                        GameObject loadedObj;
-
-                        try
-                        {
-                            //loading new one
-                            loadedObj = new OBJLoader().Load(ms);
-                            //rename new
-                            loadedObj.name = "after_reg_mesh";
-                            loadedObj.transform.parent = ct_parent_obj.transform;
-                            Globals.new_sent = false;
-
-                        }
-                        catch
-                        {
-                            Debug.Log("ms is fucked up");
-                        }
-
-                        Debug.Log("obj was loaded " + cnt_pressed);
-                    }
-                    catch
-                    {
-                        Debug.Log("exception on OBJLoader");
-                    }
-
-                }
-            }
+        
 
         }
+    public void OnRegistrationClick()
+    {
+        Debug.Log("Registration Click!");
+        if (Globals.new_sent == true)
+        {
+
+
+
+
+            //destroy old one
+            foreach (Transform child in ct_parent_obj.transform)
+            {
+                Destroy(child.gameObject);
+            }
+            ms = new MemoryStream(Encoding.UTF8.GetBytes(Globals.obj_string));
+
+            cnt_pressed++;
+            try
+            {
+                GameObject loadedObj;
+
+                try
+                {
+                    //loading new one
+                    loadedObj = new OBJLoader().Load(ms);
+                    //rename new
+                    loadedObj.name = "after_reg_mesh";
+                    loadedObj.transform.parent = ct_parent_obj.transform;
+                    loadedObj.AddComponent<SphereCollider>();
+                    loadedObj.AddComponent<NearInteractionGrabbable>();
+                    loadedObj.AddComponent<ObjectManipulator>();
+                    Globals.new_sent = false;
+
+                }
+                catch
+                {
+                    Debug.Log("ms is fucked up");
+                }
+
+                Debug.Log("obj was loaded " + cnt_pressed);
+            }
+            catch
+            {
+                Debug.Log("exception on OBJLoader");
+            }
+        }
+    }
+
         public void ReadStringInputUI(string s)
         {
             input_host = s;
             host = input_host;
-            Debug.Log(input_host);
+            
+        IPAddress ip;
+        bool ValidateIP = IPAddress.TryParse(input_host, out ip);
+        if (ValidateIP)
+        {
+            Debug.Log("Valid IP: " + input_host);
+            //GameObject.Find("Canvas").transform.localScale = new Vector3(0, 0, 0);
+            GameObject canvas_obj = GameObject.Find("Canvas");
+            canvas_obj.SetActive(!canvas_obj.active);
             ZMQClient();
+        }
+        else
+        {
+            TextMeshProUGUI textmeshPro = GameObject.Find("Text (TMP)").GetComponent<TextMeshProUGUI>();
+            textmeshPro.SetText("Invalid IP, please re-enter");
+        }
+            
             
 
         }

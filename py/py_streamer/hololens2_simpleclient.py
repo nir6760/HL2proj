@@ -353,7 +353,7 @@ if __name__ == '__main__':
                 # rgb + depth to ply
                 # save ply
 
-                ply_was_saved = save_ply_from_client(reg_folder, objects_folder=ply_folder)
+                ply_was_saved = save_ply_from_client(reg_folder, objects_folder=ply_folder, radius_cut=0.5)
 
                 if only_smaple:
                     print('lets stop here for now, only sample, round num is ', rounds)
@@ -361,7 +361,7 @@ if __name__ == '__main__':
                     # push 1
                 transformed_obj_mesh_path = None
                 if ply_was_saved:
-                    # get ply from ct scan
+                    # get ply from ct scan, must send the corresponding obj file
                     ct_scan_path = os.path.join(ply_folder, 'only_face_doll8.ply')
                     ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll1_mesh.obj')
 

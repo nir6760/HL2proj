@@ -291,7 +291,8 @@ def save_single_pcloud(shared_dict,
                        clamp_max,
                        depth_path_suffix,
                        disable_project_pinhole,
-                       objects_folder
+                       objects_folder,
+                       radius_cut=0.5
                        ):
     xyz_center_face = None
     suffix = '_cam' if save_in_cam_space else ''
@@ -422,7 +423,8 @@ def save_single_pcloud(shared_dict,
                 print('Saved ply with color face mask %s' % output_path)
                 if xyz_center_face is not None:
                     ply_path = output_path
-                    extract_face_in_radius_from_ply(ply_path, xyz_center_face, path, suffix, objects_folder)
+                    extract_face_in_radius_from_ply(ply_path, xyz_center_face, path, suffix, objects_folder
+                                                    , radius_cut=0.5)
                     print('Saved ply with ply face mask %s' % output_path)
 
         else:
@@ -430,7 +432,7 @@ def save_single_pcloud(shared_dict,
     return True
 
 
-def extract_face_in_radius_from_ply(ply_path, xyz_center_face, path1, suffix, objects_folder=None):
+def extract_face_in_radius_from_ply(ply_path, xyz_center_face, path1, suffix, objects_folder=None, radius_cut=0.5):
     # Read point cloud from PLY
     pcd1_before_cutting = o3d.io.read_point_cloud(ply_path)
     # visualization before face mask
@@ -443,11 +445,10 @@ def extract_face_in_radius_from_ply(ply_path, xyz_center_face, path1, suffix, ob
     # helper for delete too far points
     # Sphere center and radius
     center = np.array(xyz_center_face)
-    radius = 0.68  # todo: check this radius
 
     # Calculate distances to center, set new points
     distances = np.linalg.norm(points - center, axis=1)
-    mask_dist = distances <= radius
+    mask_dist = distances <= radius_cut
     filterd_points = points[mask_dist]
     filterd_colors = colors[mask_dist]
     pcd1.points = o3d.utility.Vector3dVector(filterd_points)
@@ -541,7 +542,8 @@ def load_lut_from_nptxt(folder):
     return lut
 
 
-def save_ply_from_client(folder, stream_live=True, ext_mat_glob=None, lut_arr_glob=None, objects_folder=None):
+def save_ply_from_client(folder, stream_live=True, ext_mat_glob=None, lut_arr_glob=None, objects_folder=None
+                         , radius_cut=0.5):
     save_in_cam_space = False
 
     discard_no_rgb = True
@@ -630,7 +632,8 @@ def save_ply_from_client(folder, stream_live=True, ext_mat_glob=None, lut_arr_gl
                                            clamp_max,
                                            depth_path_suffix,
                                            disable_project_pinhole,
-                                           objects_folder=objects_folder
+                                           objects_folder=objects_folder,
+                                           radius_cut=0.5
                                            )
     multiprocess_pool.close()
     multiprocess_pool.join()
@@ -656,4 +659,4 @@ if __name__ == '__main__':
     folder = w_path = Path(args.recording_path)
     is_dir = folder.is_dir()
 
-    save_ply_from_client(folder, stream_live=False)
+    save_ply_from_client(folder, stream_live=False, radius_cut=0.5)

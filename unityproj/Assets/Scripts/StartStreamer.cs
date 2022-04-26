@@ -19,21 +19,21 @@ public class StartStreamer : MonoBehaviour
     void Start()
     {
 #if !UNITY_EDITOR
-        Debug.Log("Not unity editor");
+        //Debug.Log("Not unity editor");
 #else
-    Debug.Log("Windows Runtime Support enabled 0 ");
+    //Debug.Log("Windows Runtime Support enabled 0 ");
 #endif
 #if WINDOWS_UWP
-        Debug.Log("UWP app");
+        //Debug.Log("UWP app");
 
 #else
-    Debug.Log("Not UWP app ");
+    //Debug.Log("Not UWP app ");
 #endif
 #if ENABLE_WINMD_SUPPORT
-        Debug.Log("Again not unity editor");
+        //Debug.Log("Again not unity editor");
         StartDll();
 #else
-    Debug.Log("Windows Runtime Support enabled 0 ");
+    //Debug.Log("Windows Runtime Support enabled 0 ");
 #endif
     }
 
