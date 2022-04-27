@@ -350,6 +350,7 @@ def save_single_pcloud(shared_dict,
 
                 pv_img_after, x_center_face, y_center_face, face_detected = detect_and_mask(pv_img)
                 if face_detected:
+                    print("Detected a face")
                     # Project from depth to pv going via world space
                     # index_center_face is the index of point cloud id at the pixel of the center of the face in color image
                     rgb, depth, xyz_center_face = project_on_pv_nir(

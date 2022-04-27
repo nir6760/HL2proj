@@ -1,4 +1,5 @@
 # examples/Python/Advanced/global_registration.py
+import shutil
 from pathlib import Path
 import open3d as o3d
 import numpy as np
@@ -6,6 +7,7 @@ import copy
 import os
 import argparse
 from StreamRecorderConverter.meshing_pcd import meshing_pcd
+from datetime import datetime
 
 file_path = Path(__file__)
 folder = file_path.parent.parent
@@ -153,8 +155,8 @@ if __name__ == "__main__":
 
     #voxel_size = 0.05  # means 5cm for the dataset
     source, target, source_down, target_down, source_fpfh, target_fpfh = \
-        prepare_dataset(voxel_size, source_name='after_reg_face_oren1.ply',
-                        target_name='only_face_doll1.ply')
+        prepare_dataset(voxel_size, source_name='only_face_doll8.ply',
+                        target_name='after_reg_face_oren1.ply')
     draw_registration_result(source, target, np.identity(4),
                              title='Input')
     result_ransac = execute_global_registration(source_down, target_down,
@@ -234,7 +236,9 @@ def do_registration(source_path, target_path, source_mesh_path):
     #                          title='Point To Plane ICP')
 
     source_path_mesh = os.path.join(obj_folder, source_mesh_name)
-    source_path_mesh_after_reg = os.path.join(txt_folder, 'after_reg_mesh.obj')
+    now = datetime.now()
+    file_name =  f'after_reg_mesh_{now.strftime("%d_%m_%Y__%H_%M_%S")}'
+    source_path_mesh_after_reg = os.path.join(txt_folder, f'{file_name}.obj')
 
     source_mesh = o3d.io.read_triangle_mesh(source_path_mesh)
     source_temp_mesh = copy.deepcopy(source_mesh)
@@ -242,7 +246,6 @@ def do_registration(source_path, target_path, source_mesh_path):
     #draw_pcd(source_temp_mesh, title='mesh after reg')
     print('save transformed mesh status:')
     print(o3d.io.write_triangle_mesh(source_path_mesh_after_reg, source_temp_mesh))
-    p = Path(source_path_mesh_after_reg)
-    p.rename(p.with_suffix('.txt'))
-    source_path_mesh_after_reg_to_send = os.path.join(txt_folder, 'after_reg_mesh.txt')
+    source_path_mesh_after_reg_to_send = os.path.join(txt_folder, f'{file_name}.txt')
+    shutil.copyfile(source_path_mesh_after_reg, source_path_mesh_after_reg_to_send)
     return source_path_mesh_after_reg_to_send

@@ -1,4 +1,5 @@
 import os
+import shutil
 import socket
 import struct
 import abc
@@ -260,11 +261,11 @@ if __name__ == '__main__':
     parser.add_argument("--only_smaple", required=False, default=False,
                         help="sample once pcd")
     args = parser.parse_args()
-    only_smaple = args.only_smaple
+    only_sample = args.only_smaple
     print('script start:')
     # print('getting extrincs and lut:')
     #
-    # ext_lut_receiver = ExtLutReceiverThread(HOST,
+    # ext_lut_receiver = ExtLutReceiverThread(CLIENT,
     #                                         EXT_LUT_STREAM_PORT, EXT_LUT_STREAM_HEADER_FORMAT, EXT_LUT_STREAM_HEADER)
     # ext_lut_receiver.start_socket('ExtLut')
     # t_ext_lut = ext_lut_receiver.start_listen()
@@ -355,7 +356,7 @@ if __name__ == '__main__':
 
                 ply_was_saved = save_ply_from_client(reg_folder, objects_folder=ply_folder, radius_cut=0.5)
 
-                if only_smaple:
+                if only_sample:
                     print('lets stop here for now, only sample, round num is ', rounds)
                     exit(0)
                     # push 1
@@ -363,10 +364,15 @@ if __name__ == '__main__':
                 if ply_was_saved:
                     # get ply from ct scan, must send the corresponding obj file
                     ct_scan_path = os.path.join(ply_folder, 'only_face_doll8.ply')
-                    ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll1_mesh.obj')
+                    ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll8_mesh.obj')
 
                     # get ply from streaming
                     streaming_face_path = os.path.join(ply_folder, 'only_face.ply')
+                    saving_streaming_face_debug_path = os.path.join(ply_folder, 'only_face.ply')
+                    now = datetime.now()
+                    file_name = f'only_face_{now.strftime("%d_%m_%Y__%H_%M_%S")}.ply'
+                    shutil.copyfile(streaming_face_path, os.path.join(ply_folder, file_name))
+
 
                     # delete all txt files
                     delete_txt_from_dir_content(txt_folder)
@@ -387,6 +393,6 @@ if __name__ == '__main__':
                 # registration_was_pressed = False
 
                 # start again
-                rounds = rounds + 1
+                rounds += 1
 
         video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)

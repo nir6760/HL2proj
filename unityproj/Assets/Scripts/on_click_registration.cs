@@ -54,7 +54,6 @@ public static class Globals
         private ClientStatus _clientStatus = ClientStatus.Inactive;
 
 
-        public GameObject buttomn;
         public GameObject ct_parent_obj;
         private string input_host;
         private string input_port;
@@ -66,19 +65,22 @@ public static class Globals
     // Start is called before the first frame update
     void Start()
         {
-
-        
+        Debug.Log("Valid IP: " + host);
+        //GameObject.Find("Canvas").transform.localScale = new Vector3(0, 0, 0);
+        GameObject canvas_obj = GameObject.Find("Canvas");
+        canvas_obj.SetActive(!canvas_obj.active);
+        ZMQClient();
 #if !UNITY_EDITOR
         //Debug.Log("Not Unity Editor, UWP");
 #else
         //Debug.Log("Unity Editor");
-            /*thread_1 = new Thread(ZMQClient);
-            thread_1.IsBackground = true;
-            thread_1.Start();*/
+        /*thread_1 = new Thread(ZMQClient);
+        thread_1.IsBackground = true;
+        thread_1.Start();*/
 #endif
 
 
-        }
+    }
 
 
 #if !UNITY_EDITOR
@@ -175,13 +177,14 @@ public static class Globals
         
         if (_clientStatus == ClientStatus.Active)
             _listener.DigestMessage();
+        OnRegistrationClick();
 
-        
+
 
         }
     public void OnRegistrationClick()
     {
-        Debug.Log("Registration Click!");
+        //Debug.Log("Registration Click!");
         if (Globals.new_sent == true)
         {
 
@@ -240,6 +243,7 @@ public static class Globals
             //GameObject.Find("Canvas").transform.localScale = new Vector3(0, 0, 0);
             GameObject canvas_obj = GameObject.Find("Canvas");
             canvas_obj.SetActive(!canvas_obj.active);
+
             ZMQClient();
         }
         else
