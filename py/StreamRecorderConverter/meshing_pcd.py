@@ -68,6 +68,7 @@ if __name__ == "__main__":
     pcd_points_np = np.asarray(pcd.points)
     pcd_points_np[:, [2]] = pcd_points_np[:, [2]] * (-1)
     # From numpy to Open3D
+
     pcd.points = o3d.utility.Vector3dVector(pcd_points_np)
     # pcd = mesh.sample_points_poisson_disk(750)
     pcd.estimate_normals()

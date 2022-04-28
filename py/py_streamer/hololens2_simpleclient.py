@@ -3,7 +3,6 @@ import shutil
 import socket
 import struct
 import abc
-import zmq
 import threading
 from datetime import datetime, timedelta
 from collections import namedtuple, deque
@@ -382,15 +381,13 @@ if __name__ == '__main__':
                     transformed_obj_mesh_path = do_registration(source_path=ct_scan_path,
                                                                 target_path=streaming_face_path,
                                                                 source_mesh_path=ct_scan_mesh_path)
-                    print('end registration:')
-                    time.sleep(3)
+                    print('end registration.')
+                    time.sleep(1)
+                    # send registration back
+                    print(f"sending file - {transformed_obj_mesh_path}")
+                    send_file_to_HL(transformed_obj_mesh_path, zmq_server)
                 else:
-                    print('There wasnt saving at the last round')
-
-                # send registration back
-                print(f"transformed mesh path {transformed_obj_mesh_path}")
-                send_file_to_HL(transformed_obj_mesh_path, zmq_server)
-                # registration_was_pressed = False
+                    print('ply was not saved,and therefore there was not registration')
 
                 # start again
                 rounds += 1

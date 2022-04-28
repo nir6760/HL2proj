@@ -143,7 +143,7 @@ def refine_registration_point_to_point(source, target, source_fpfh, target_fpfh,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='fast registration')
-    parser.add_argument("--save_transformed_mesh", required=False, default=False,
+    parser.add_argument("--save_transformed_mesh", type=bool, required=False, default=True,
                         help="save transformed mesh?")
     parser.add_argument("--voxel_size", required=False, default=0.01, type=float,
                         help="voxel_size")
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     #voxel_size = 0.05  # means 5cm for the dataset
     source, target, source_down, target_down, source_fpfh, target_fpfh = \
         prepare_dataset(voxel_size, source_name='only_face_doll8.ply',
-                        target_name='after_reg_face_oren1.ply')
+                        target_name='only_face_27_04_2022__21_42_50.ply')
     draw_registration_result(source, target, np.identity(4),
                              title='Input')
     result_ransac = execute_global_registration(source_down, target_down,
@@ -216,12 +216,6 @@ def do_registration(source_path, target_path, source_mesh_path):
     print("Apply point-to-point ICP")
     result_point_to_point_icp = refine_registration_point_to_point(source, target, source_fpfh, target_fpfh,
                                                                    voxel_size, result_ransac.transformation)
-    print(result_point_to_point_icp)
-    print("result_point_to_point_icp Transformation is:")
-    print(result_point_to_point_icp.transformation)
-    print("")
-    # draw_registration_result(source, target, result_point_to_point_icp.transformation,
-    #                          title='Point To Point ICP')
 
     print("\n\n")
     print("Apply point-to-plane ICP")
