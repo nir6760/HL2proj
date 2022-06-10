@@ -20,12 +20,13 @@ venv.bak/
 
 # others
 .idea/
-.try_face_ahat_2/
-.try_face_ahat_5/
-.try_face_LT/
-.outputs/obj_files/
-.outputs/ply_files/
-.outputs/txt_files/
+try_face_ahat_2/
+try_face_ahat_5/
+try_face_LT/
+outputs/obj_files/
+outputs/ply_files/
+outputs/txt_files/
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
