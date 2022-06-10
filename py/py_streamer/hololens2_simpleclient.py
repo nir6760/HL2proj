@@ -15,6 +15,7 @@ from pathlib import Path
 from StreamRecorderConverter.savePcloud_v2 import save_data_for_registration, save_ply_from_client, \
     delete_txt_from_dir_content
 from StreamRecorderConverter.fast_registration import do_registration
+from file_converter_obj_to_ply.convert import PLYwithRGB
 from py_streamer.test_tcp_client import send_file_to_HL
 from py_streamer.zmq_server import ServerZMQ
 
@@ -62,9 +63,8 @@ AHAT_STREAM_PORT = 23941
 EXT_LUT_STREAM_PORT = 23941
 LOADING_PORT = 12345
 # HOST = '192.168.0.80'
-HOST = '10.0.0.2'
+HOST = '10.0.0.1'
 LOCAL_HOST = '127.0.0.1'
-
 
 HundredsOfNsToMilliseconds = 1e-4
 MillisecondsToSeconds = 1e-3
@@ -292,6 +292,9 @@ if __name__ == '__main__':
     rounds = 1
     video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)
 
+    # get initialized ply from ct scan, must send the corresponding obj file
+    ct_scan_path = os.path.join(ply_folder, 'only_face_doll8.ply')
+    ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll8_mesh.obj')
     while True:
         time.sleep(1)
         # kill
@@ -358,34 +361,34 @@ if __name__ == '__main__':
                 if only_sample:
                     print('lets stop here for now, only sample, round num is ', rounds)
                     exit(0)
-                    # push 1
-                transformed_obj_mesh_path = None
+                transformed_obj_mesh_txt_path = None
                 if ply_was_saved:
-                    # get ply from ct scan, must send the corresponding obj file
-                    ct_scan_path = os.path.join(ply_folder, 'only_face_doll8.ply')
-                    ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll8_mesh.obj')
-
                     # get ply from streaming
                     streaming_face_path = os.path.join(ply_folder, 'only_face.ply')
                     saving_streaming_face_debug_path = os.path.join(ply_folder, 'only_face.ply')
                     now = datetime.now()
                     file_name = f'only_face_{now.strftime("%d_%m_%Y__%H_%M_%S")}.ply'
                     shutil.copyfile(streaming_face_path, os.path.join(ply_folder, file_name))
-
-
                     # delete all txt files
                     delete_txt_from_dir_content(txt_folder)
                     # get saving transformed obj as txt
                     # do registration and save results
                     print('start registration:')
-                    transformed_obj_mesh_path = do_registration(source_path=ct_scan_path,
-                                                                target_path=streaming_face_path,
-                                                                source_mesh_path=ct_scan_mesh_path)
+                    transformed_obj_mesh_txt_path, transformed_obj_mesh_obj_path = do_registration(source_path=ct_scan_path,
+                                                                      target_path=streaming_face_path,
+                                                                      source_mesh_path=ct_scan_mesh_path)
                     print('end registration.')
                     time.sleep(1)
                     # send registration back
-                    print(f"sending file - {transformed_obj_mesh_path}")
-                    send_file_to_HL(transformed_obj_mesh_path, zmq_server)
+                    print(f"sending file - {transformed_obj_mesh_txt_path}")
+                    send_file_to_HL(transformed_obj_mesh_txt_path, zmq_server)
+
+                    # transformed_obj_mesh_path to ply
+                    transformed_ply_file_path = ct_scan_path
+                    PLYwithRGB(transformed_obj_mesh_obj_path, transformed_ply_file_path)
+                    # send source as  ply(transformed_obj_mesh)
+                    ct_scan_path = transformed_ply_file_path
+                    ct_scan_mesh_path = transformed_obj_mesh_obj_path
                 else:
                     print('ply was not saved,and therefore there was not registration')
 

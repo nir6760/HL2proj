@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Visual Studio cache directory
+.vs/
+
 # Environments
 .env
 .venv
@@ -16,14 +19,13 @@ env.bak/
 venv.bak/
 
 # others
-.py/try_face_ahat_2
-.py/try_face_ahat_5
-.py/try_face_LT
-.py/outputs/obj_files/
-.py/outputs/ply_files/
-.py/outputs/txt_files/
-
-
+.idea/
+.try_face_ahat_2/
+.try_face_ahat_5/
+.try_face_LT/
+.outputs/obj_files/
+.outputs/ply_files/
+.outputs/txt_files/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

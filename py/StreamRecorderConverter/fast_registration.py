@@ -242,4 +242,4 @@ def do_registration(source_path, target_path, source_mesh_path):
     print(o3d.io.write_triangle_mesh(source_path_mesh_after_reg, source_temp_mesh))
     source_path_mesh_after_reg_to_send = os.path.join(txt_folder, f'{file_name}.txt')
     shutil.copyfile(source_path_mesh_after_reg, source_path_mesh_after_reg_to_send)
-    return source_path_mesh_after_reg_to_send
+    return source_path_mesh_after_reg_to_send, source_path_mesh_after_reg
