@@ -26,6 +26,7 @@ try_face_LT/
 outputs/obj_files/
 outputs/ply_files/
 outputs/txt_files/
+outputs/backup/
 
 
 # PyCharm
