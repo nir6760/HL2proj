@@ -155,10 +155,11 @@ if __name__ == "__main__":
 
     #voxel_size = 0.05  # means 5cm for the dataset
     source, target, source_down, target_down, source_fpfh, target_fpfh = \
-        prepare_dataset(voxel_size, source_name='only_face_doll8.ply',
-                        target_name='only_face_27_04_2022__21_42_50.ply')
+        prepare_dataset(voxel_size, source_name='only_face_doll8_transformed_11_06_2022__15_52_05.ply',
+                        target_name='only_face_doll8.ply')
     draw_registration_result(source, target, np.identity(4),
                              title='Input')
+
     result_ransac = execute_global_registration(source_down, target_down,
                                                 source_fpfh, target_fpfh,
                                                 voxel_size)

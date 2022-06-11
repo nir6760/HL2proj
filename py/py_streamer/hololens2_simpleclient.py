@@ -15,7 +15,7 @@ from pathlib import Path
 from StreamRecorderConverter.savePcloud_v2 import save_data_for_registration, save_ply_from_client, \
     delete_txt_from_dir_content
 from StreamRecorderConverter.fast_registration import do_registration
-from file_converter_obj_to_ply.convert import PLYwithRGB
+from file_converter_obj_to_ply.convert import PLYwithoutRGB
 from py_streamer.test_tcp_client import send_file_to_HL
 from py_streamer.zmq_server import ServerZMQ
 
@@ -382,10 +382,9 @@ if __name__ == '__main__':
                     # send registration back
                     print(f"sending file - {transformed_obj_mesh_txt_path}")
                     send_file_to_HL(transformed_obj_mesh_txt_path, zmq_server)
-
                     # transformed_obj_mesh_path to ply
-                    transformed_ply_file_path = ct_scan_path
-                    PLYwithRGB(transformed_obj_mesh_obj_path, transformed_ply_file_path)
+                    transformed_ply_file_path = f'ctScan_transformed_{now.strftime("%d_%m_%Y__%H_%M_%S")}.ply'
+                    PLYwithoutRGB(transformed_obj_mesh_obj_path, transformed_ply_file_path)
                     # send source as  ply(transformed_obj_mesh)
                     ct_scan_path = transformed_ply_file_path
                     ct_scan_mesh_path = transformed_obj_mesh_obj_path

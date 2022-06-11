@@ -5,13 +5,17 @@ import file_converter_obj_to_ply.d3.model.tools as mt
 import functools as fc
 from file_converter_obj_to_ply.d3.model.basemodel import Vector
 
+def PLYwithoutRGB(input_path, output_path, up_conversion=None):
+	result = mt.convert(input_path, output_path, up_conversion)
+	with open(output_path, 'w') as f:
+		f.write(result)
 
 def PLYwithRGB(objFile, plyFile):
 	fileToMake = plyFile[:len(plyFile)-4]
 	fileToMake = fileToMake+"WithRGB.ply"
 
 	objFileOpened = open(objFile,"r")
-	plyFileOpened = open(plyFile,"r", errors="ignore")
+	plyFileOpened = open(plyFile,"r")
 	fileToMake = open(fileToMake, "w")
 	objFileData = []
 
