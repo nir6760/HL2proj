@@ -4,9 +4,9 @@
 Made with Unity (2020.3.13f1) and Python (3.8.3).
 <br/>
 ## Project FlowChart
-![Project FlowChart](/assets)
+![Project FlowChart](/py/flowcharts/ProjectDiagram.png)
 ## Registration Block FlowChart
-![Registration FlowChart](/assets)
+![Registration FlowChart](/py/flowcharts/RegistrationDiagram.png)
 ### How to run?
 Clone the repository to a local folder system. \
 \
