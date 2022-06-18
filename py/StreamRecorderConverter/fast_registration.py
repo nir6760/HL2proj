@@ -129,7 +129,7 @@ def refine_registration_point_to_plane(source, target, source_fpfh, target_fpfh,
     return result
 
 
-def refine_registration_point_to_point(source, target, source_fpfh, target_fpfh, voxel_size
+def refine_registration_point_to_point(source, target, voxel_size
                                        , result_ransac_transformation):
     distance_threshold = voxel_size * 0.4
     print(":: Point-to-plane ICP registration is applied on original point")
@@ -153,10 +153,14 @@ if __name__ == "__main__":
     save_transformed_mesh = args.save_transformed_mesh
     voxel_size = args.voxel_size
 
+    obj_mesh = os.path.join(obj_folder, 'only_face_doll8_mesh.obj')
+    obj_mesh_o3d = o3d.io.read_triangle_mesh(obj_mesh)
+    o3d.visualization.draw_geometries([obj_mesh_o3d])
+
     #voxel_size = 0.05  # means 5cm for the dataset
     source, target, source_down, target_down, source_fpfh, target_fpfh = \
-        prepare_dataset(voxel_size, source_name='only_face_doll8_transformed_11_06_2022__15_52_05.ply',
-                        target_name='only_face_doll8.ply')
+        prepare_dataset(voxel_size, source_name='only_face_doll8.ply',
+                        target_name='only_face_doll7.ply')
     draw_registration_result(source, target, np.identity(4),
                              title='Input')
 
@@ -172,7 +176,7 @@ if __name__ == "__main__":
                              result_ransac.transformation,
                              title='Ransac Alg')
     print("Apply point-to-point ICP")
-    result_point_to_point_icp = refine_registration_point_to_point(source, target, source_fpfh, target_fpfh,
+    result_point_to_point_icp = refine_registration_point_to_point(source, target,
                                                                    voxel_size, result_ransac.transformation)
     print(result_point_to_point_icp)
     print("result_point_to_point_icp Transformation is:")
@@ -208,15 +212,10 @@ def do_registration(source_path, target_path, source_mesh_path):
                                                 voxel_size)
     print("result_ransac:")
     print(result_ransac.transformation)
-    # draw_registration_result(source_down, target_down,
-    #                          result_ransac.transformation, title='Ransac Alg - Down Samples')
 
-    # draw_registration_result(source, target,
-    #                          result_ransac.transformation,
-    #                          title='Ransac Alg')
-    print("Apply point-to-point ICP")
-    result_point_to_point_icp = refine_registration_point_to_point(source, target, source_fpfh, target_fpfh,
-                                                                   voxel_size, result_ransac.transformation)
+    # print("Apply point-to-point ICP")
+    # result_point_to_point_icp = refine_registration_point_to_point(source, target,
+    #                                                                voxel_size, result_ransac.transformation)
 
     print("\n\n")
     print("Apply point-to-plane ICP")
@@ -227,20 +226,19 @@ def do_registration(source_path, target_path, source_mesh_path):
     print(result_icp_point_to_plane_icp.transformation)
     print("")
 
-    # draw_registration_result(source, target, result_icp_point_to_plane_icp.transformation,
-    #                          title='Point To Plane ICP')
 
-    source_path_mesh = os.path.join(obj_folder, source_mesh_name)
+
+    source_path_mesh = os.path.join(txt_folder, source_mesh_name)
     now = datetime.now()
-    file_name =  f'after_reg_mesh_{now.strftime("%d_%m_%Y__%H_%M_%S")}'
-    source_path_mesh_after_reg = os.path.join(txt_folder, f'{file_name}.obj')
-
+    file_name = f'after_reg_mesh_{now.strftime("%d_%m_%Y__%H_%M_%S")}'
+    source_path_mesh_after_reg = os.path.join(txt_folder, f'{file_name}_obj.obj')
+    print(f"Reading {source_path_mesh}")
     source_mesh = o3d.io.read_triangle_mesh(source_path_mesh)
     source_temp_mesh = copy.deepcopy(source_mesh)
     source_temp_mesh.transform(result_icp_point_to_plane_icp.transformation)
     #draw_pcd(source_temp_mesh, title='mesh after reg')
     print('save transformed mesh status:')
     print(o3d.io.write_triangle_mesh(source_path_mesh_after_reg, source_temp_mesh))
-    source_path_mesh_after_reg_to_send = os.path.join(txt_folder, f'{file_name}.txt')
+    source_path_mesh_after_reg_to_send = os.path.join(txt_folder, f'{file_name}_txt.txt')
     shutil.copyfile(source_path_mesh_after_reg, source_path_mesh_after_reg_to_send)
     return source_path_mesh_after_reg_to_send, source_path_mesh_after_reg

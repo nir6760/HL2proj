@@ -27,6 +27,8 @@ outputs/obj_files/
 outputs/ply_files/
 outputs/txt_files/
 outputs/backup/
+register_folder/pinhole_projection/rgb/
+register_folder/pinhole_projection/depth/
 
 
 # PyCharm

@@ -65,6 +65,7 @@ LOADING_PORT = 12345
 # HOST = '192.168.0.80'
 HOST = '10.0.0.1'
 LOCAL_HOST = '127.0.0.1'
+obj_to_ply_flag = False
 
 HundredsOfNsToMilliseconds = 1e-4
 MillisecondsToSeconds = 1e-3
@@ -293,8 +294,8 @@ if __name__ == '__main__':
     video_receiver, ahat_receiver, t_video, t_ahaht = start_socket_and_listen(rounds)
 
     # get initialized ply from ct scan, must send the corresponding obj file
-    ct_scan_path = os.path.join(ply_folder, 'only_face_doll8.ply')
-    ct_scan_mesh_path = os.path.join(obj_folder, 'only_face_doll8_mesh.obj')
+    ct_scan_path = os.path.join(ply_folder, 'face_oren1.ply')
+    ct_scan_mesh_path = os.path.join(txt_folder, 'face_oren1_mesh.obj')
     while True:
         time.sleep(1)
         # kill
@@ -374,20 +375,43 @@ if __name__ == '__main__':
                     # get saving transformed obj as txt
                     # do registration and save results
                     print('start registration:')
-                    transformed_obj_mesh_txt_path, transformed_obj_mesh_obj_path = do_registration(source_path=ct_scan_path,
-                                                                      target_path=streaming_face_path,
-                                                                      source_mesh_path=ct_scan_mesh_path)
+                    print(f"source_path = {ct_scan_path}")
+                    print(f"target_path = {streaming_face_path}")
+                    print(f"source_mesh_path = {ct_scan_mesh_path}")
+
+                    print(f"before reg, ct_scan_path={ct_scan_path}")
+                    import open3d as o3d
+                    source = o3d.io.read_point_cloud(ct_scan_path)
+                    print(source)
+
+                    print(f"before reg, streaming_face_path={streaming_face_path}")
+                    source = o3d.io.read_point_cloud(streaming_face_path)
+                    print(source)
+
+                    transformed_obj_mesh_txt_path, transformed_obj_mesh_obj_path = do_registration(
+                        source_path=ct_scan_path,
+                        target_path=streaming_face_path,
+                        source_mesh_path=ct_scan_mesh_path)
                     print('end registration.')
+                    print(f"after reg, transformed_obj_mesh_obj_path={transformed_obj_mesh_obj_path}")
+                    with open(transformed_obj_mesh_obj_path, "r") as f:
+                        print(f"len of files is {len(f.readlines())}")
                     time.sleep(1)
                     # send registration back
                     print(f"sending file - {transformed_obj_mesh_txt_path}")
                     send_file_to_HL(transformed_obj_mesh_txt_path, zmq_server)
-                    # transformed_obj_mesh_path to ply
-                    transformed_ply_file_path = f'ctScan_transformed_{now.strftime("%d_%m_%Y__%H_%M_%S")}.ply'
-                    PLYwithoutRGB(transformed_obj_mesh_obj_path, transformed_ply_file_path)
-                    # send source as  ply(transformed_obj_mesh)
-                    ct_scan_path = transformed_ply_file_path
-                    ct_scan_mesh_path = transformed_obj_mesh_obj_path
+
+                    if obj_to_ply_flag:
+                        # transformed_obj_mesh_path to ply
+                        transformed_ply_file_path = os.path.join(ply_folder, f'ctScan_transformed_{now.strftime("%d_%m_%Y__%H_%M_%S")}.ply')
+                        # PLYwithoutRGB(transformed_obj_mesh_obj_path, transformed_ply_file_path
+                        #o3d convert
+                        obj_o3d = o3d.io.read_triangle_mesh(transformed_obj_mesh_obj_path)
+                        o3d.io.write_point_cloud(filename=transformed_ply_file_path,
+                                                 pointcloud=o3d.cpu.pybind.geometry.PointCloud(obj_o3d.vertices))
+                        # send source as ply(transformed_obj_mesh)
+                        ct_scan_path = transformed_ply_file_path
+                        ct_scan_mesh_path = transformed_obj_mesh_obj_path
                 else:
                     print('ply was not saved,and therefore there was not registration')
 

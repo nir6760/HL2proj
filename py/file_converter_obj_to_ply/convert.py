@@ -123,9 +123,10 @@ if __name__ == '__main__':
 	parser.add_argument('-tu', '--to-up', metavar='fup', default=None,
 						help="Output up vector")
 	args = parser.parse_args()
-	args.func(args)
+	#args.func(args)
 
 	objFile = args.input
 	plyFile = args.output
-	PLYwithRGB(objFile,plyFile)
+	#PLYwithRGB(objFile,plyFile)
+	PLYwithoutRGB(objFile, plyFile)
 

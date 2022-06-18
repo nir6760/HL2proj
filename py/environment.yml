@@ -1,4 +1,4 @@
-name: base
+name: HL2_venv
 channels:
   - defaults
 dependencies:
