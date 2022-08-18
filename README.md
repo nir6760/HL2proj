@@ -1,6 +1,10 @@
 # HL2 RegistrationApp
 **Face Registration Application for HoloLens 2.**
 <br/>
+The goal is to help surgeons see the patient 3D CT scan registering to the patient real-time face while looking at the patient during surgery.
+<br/>
+The App was implemented for running on HoloLens 2 (Microsoft mixed reality headset).
+<br/>
 Made with Unity (2020.3.13f1) and Python (3.8.3).
 <br/>
 ## Project FlowChart
